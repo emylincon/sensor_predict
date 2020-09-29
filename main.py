@@ -12,6 +12,7 @@ import requests
 from Predict import GroupLSTM
 from Predict import GetARIMA
 from threading import Thread
+import random as r
 
 app = Flask(__name__)
 
@@ -192,8 +193,8 @@ def add_data(temperature, humidity):
     lstm_data = lstm_agent.predict(get_db_data('lstm'))
 
     data1 = Sensors(datetime=my_date,
-                    temperature=temperature,
-                    humidity=humidity,
+                    temperature=temperature+r.uniform(0.1,1),
+                    humidity=humidity+r.uniform(0.1,1),
                     heat_index=heat_index)
 
     data2 = LSTMData(datetime=my_date,
@@ -214,17 +215,15 @@ def add_data(temperature, humidity):
 
 def send_data_to_server():
     data = get_data()
-    print('data to server->', data)
-    # endpoint = 'https://lsbu-sensors.herokuapp.com/send'
-    # requests.post(endpoint, json=data, )
+    # print('data to server->', data)
+    endpoint = 'https://lsbu-sensors.herokuapp.com/send'
+    requests.post(endpoint, json=data, )
 
 
 @app.route('/send')
 def send_data():
     try:
-        print('calc...')
         add_data(temperature=float(request.args.get('temperature')), humidity=float(request.args.get('humidity')))
-        print('calculating...')
         t1 = Thread(target=send_data_to_server)
         t1.start()
         # add_data(temperature=float(request.args.get('temperature')), humidity=float(request.args.get('pressure')),
@@ -366,7 +365,7 @@ class DataStat:
     def get_stat(self):
         new_stat = stat()
         # new_stat[i]
-        return {i: {j: {'data': new_stat[i][j], 'arrow': self.get_arrow(new_stat[i][j], self.stat[i][j]),
+        return {i: {j: {'data': round(new_stat[i][j], 2), 'arrow': self.get_arrow(new_stat[i][j], self.stat[i][j]),
                         '%': self.percentage(new_stat[i][j], self.stat[i][j])} for j in self.metrics} for i in
                 self.units}
 

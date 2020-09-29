@@ -54,9 +54,9 @@ class GetARIMA(Model):
     """
     def __init__(self, data):
         super().__init__(data)
-        self.describe = {'hum': {'rmse': 1.118, 'next': 400, 'date': '24-09-2020 19:09:36', 'arrow': 'up'},
+        self.describe = {'hum': {'rmse': 1.12, 'next': 400, 'date': '24-09-2020 19:09:36', 'arrow': 'up'},
                          'temp': {'rmse': 0.0, 'next': 400, 'date': '24-09-2020 19:09:36', 'arrow': 'down'},
-                         'heat': {'rmse': 0.0251, 'next': 400, 'date': '24-09-2020 19:09:36', 'arrow': 'up'}}
+                         'heat': {'rmse': 0.03, 'next': 400, 'date': '24-09-2020 19:09:36', 'arrow': 'up'}}
         self.arima_vars = None
         self.model_path = 'models/arima'
         self.load_models()
@@ -111,7 +111,7 @@ class GetARIMA(Model):
         if error > self.describe[unit]['rmse']:
             arrow = 'up'
         self.describe[unit]['arrow'] = arrow
-        self.describe[unit]['rmse'] = error
+        self.describe[unit]['rmse'] = round(error, 2)
         return pred[-1]
 
     def predict(self):
@@ -133,7 +133,7 @@ class GetARIMA(Model):
             model_arima_fit = model_arima.fit()
             predict_data = model_arima_fit.data_forecast(steps=10)[0]
             error = np.sqrt(mean_squared_error(test_data[:9], predict_data[1:]))
-            return {'model': model_arima_fit, 'rmse': error, 'next': len(test_data),
+            return {'model': model_arima_fit, 'rmse': round(error, 2), 'next': len(test_data),
                     'date':  "{:%d-%m-%Y %H:%M:%S}".format(dt.now().astimezone(self.london))}
         except Exception as e:
             return {'model': None, 'rmse': 10 ** 10, 'next': len(test_data),
@@ -159,7 +159,7 @@ class GetLSTM(Model):
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         self.kind = kind
         self.kind_dict = {'hum': 'humidity', 'temp': 'temperature', 'heat': 'heat_index'}
-        self.describe = {'rmse': 1.118, 'date': '24-09-2020 19:09:36', 'model': None, 'arrow': 'down'}
+        self.describe = {'rmse': 1.11, 'date': '24-09-2020 19:09:36', 'model': None, 'arrow': 'down'}
         self.step = 60
         self.lstm = None
         self.last_trained = None
@@ -179,9 +179,9 @@ class GetLSTM(Model):
         return lstm
 
     def load_model(self):
-        rmse = {'hum': {'rmse': 1.3491, 'accuracy': 59.82, 'loss': 40.18},
+        rmse = {'hum': {'rmse': 1.34, 'accuracy': 59.82, 'loss': 40.18},
                 'temp': {'rmse': 0.01, 'accuracy': 99.1, 'loss': 0.9},
-                'heat': {'rmse': 0.0301, 'accuracy': 71.53, 'loss': 28.47}}
+                'heat': {'rmse': 0.03, 'accuracy': 71.53, 'loss': 28.47}}
         self.describe['model'] = load_model(fr"{self.model_path}/{self.kind}.h5")
         self.describe.update(rmse[self.kind])
 
@@ -280,7 +280,7 @@ class GetLSTM(Model):
         arrow = 'down'
         if rmse > self.describe['rmse']:
             arrow = 'up'
-        return {'model': self.lstm['model'], 'rmse': rmse, 'accuracy': score, 'loss': 100-score,
+        return {'model': self.lstm['model'], 'rmse': round(rmse, 2), 'accuracy': score, 'loss': 100-score,
                 'date': "{:%d-%m-%Y %H:%M:%S}".format(now), 'arrow': arrow}
 
     def save_model(self, file_name):
