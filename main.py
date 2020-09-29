@@ -222,7 +222,9 @@ def send_data_to_server():
 @app.route('/send')
 def send_data():
     try:
+        print('calc...')
         add_data(temperature=float(request.args.get('temperature')), humidity=float(request.args.get('humidity')))
+        print('calculating...')
         t1 = Thread(target=send_data_to_server)
         t1.start()
         # add_data(temperature=float(request.args.get('temperature')), humidity=float(request.args.get('pressure')),
