@@ -214,8 +214,9 @@ def add_data(temperature, humidity):
 
 def send_data_to_server():
     data = get_data()
-    endpoint = 'https://lsbu-sensors.herokuapp.com/send'
-    requests.post(endpoint, json=data, )
+    print('data to server->', data)
+    # endpoint = 'https://lsbu-sensors.herokuapp.com/send'
+    # requests.post(endpoint, json=data, )
 
 
 @app.route('/send')
