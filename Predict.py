@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
 from keras.models import load_model
+from keras.callbacks import EarlyStopping
 import numpy as np
 import concurrent.futures
 import math
@@ -29,7 +30,7 @@ class Model:
     def __init__(self, data):
         self.data = data
         self.london = pytz.timezone('Europe/London')
-        self.max_rmse = 10
+        self.max_rmse = 2
         self.describe = {}
         self.model_path = 'models'
         self.units = ('temp', 'hum', 'heat')
@@ -243,6 +244,26 @@ class GetLSTM(Model):
     def percentage(new_value, old_value):
         return round(((new_value-old_value)/old_value) * 100, 2)
 
+    def update_rmse(self):
+        lstm = self.pre_processing(1000)
+
+        lstm['scaled'] = self.scaler.fit_transform(lstm['values'])
+        # Create an empty list
+        X_test = [lstm['scaled']]
+        # Convert the X_test data set to a numpy array
+        X_test = np.array(X_test)
+        # Reshape the data
+        X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+        # Get the predicted scaled price
+        pred = self.describe['model'].predict(X_test)
+        # undo the scaling
+        pred = self.scaler.inverse_transform(pred)
+
+        lstm['y_test'] = lstm['values'][lstm['training_data_len']:, :]
+
+        rmse = round(np.sqrt(np.mean(((pred - lstm['y_test']) ** 2))), 2)
+        self.describe['rmse'] = rmse
+
     def predict(self):
         lstm = self.pre_processing(60)
 
@@ -259,11 +280,16 @@ class GetLSTM(Model):
         pred = self.scaler.inverse_transform(pred)
         result = pred[0][0]
 
-        # if (dt.now().astimezone(self.london) - self.last_trained).seconds > self.train_time_increment:
-        #     self.train_model()
+        self.update_rmse()
+        if self.describe['rmse'] > self.max_rmse:
+            self.train_model()
         return result
 
     def train(self):
+        # simple early stopping | erly stopping is used if you are using lots of epochs
+        # es = EarlyStopping(monitor='val_loss', mode='min', verbose=1)
+        # self.lstm['history'] = self.lstm['model'].fit(self.lstm['x_train'], self.lstm['y_train'], batch_size=500, epochs=1, callbacks=[es])
+
         # Train the model
         self.lstm['history'] = self.lstm['model'].fit(self.lstm['x_train'], self.lstm['y_train'], batch_size=500, epochs=1)
 
@@ -312,7 +338,6 @@ class GroupLSTM:
     def save_models(self):
         for i in self.models:
             self.models[i].save_model(f'{i}.h5')
-
 
 
 # pt = 'data/new_data.csv'
