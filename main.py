@@ -231,7 +231,8 @@ def send_data():
         #          lstm_temp=float(request.args.get('lstm_temp')), arima_heat=float(request.args.get('arima_heat')),
         #          arima_temp=float(request.args.get('arima_temp')), arima_hum=float(request.args.get('arima_hum')))
         return jsonify({'info': 'data received'}), 200
-    except ValueError:
+    except Exception as e:
+        print('Error occurred ->', e)
         return jsonify({'info': 'Value Error! floats only!'}), 400
 
 
