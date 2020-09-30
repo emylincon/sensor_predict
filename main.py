@@ -175,7 +175,6 @@ def hello_world():
 
 def add_data(temperature, humidity):
     # my_date, heat_index, arima_temp, arima_hum, arima_heat, lstm_temp, lstm_hum, lstm_heat):
-    print('Receiving ->', temperature, humidity)
     london = pytz.timezone('Europe/London')
     time_now = dt.now().astimezone(london)
     raw_save_time = '23:59:45'
