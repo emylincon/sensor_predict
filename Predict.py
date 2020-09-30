@@ -170,6 +170,7 @@ class GetLSTM(Model):
 
     def pre_processing(self, size):
         # self.df.drop('id', axis='columns', inplace=True)
+        self.df.replace([np.inf, -np.inf], 0)
         self.df['datetime'] = pd.to_datetime(self.df['datetime'])
         self.df.set_index('datetime', inplace=True)
 
@@ -281,8 +282,11 @@ class GetLSTM(Model):
         result = pred[0][0]
 
         self.update_rmse()
-        if self.describe['rmse'] > self.max_rmse:
+        if (self.describe['rmse'] > self.max_rmse) or (result <= 0):
             self.train_model()
+
+        if result < 0:
+            result = 0
         return result
 
     def train(self):
