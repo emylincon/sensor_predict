@@ -13,6 +13,7 @@ from Predict import GroupLSTM
 from Predict import GetARIMA
 from threading import Thread
 import random as r
+import traceback
 
 app = Flask(__name__)
 
@@ -233,6 +234,7 @@ def send_data():
         return jsonify({'info': 'data received'}), 200
     except Exception as e:
         print('Error occurred ->', e)
+        traceback.print_exc()
         return jsonify({'info': 'Value Error! floats only!'}), 400
 
 
