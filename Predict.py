@@ -153,6 +153,11 @@ class GetARIMA(Model):
             completed.append(ans)
         return sorted(completed, key=lambda k: k['rmse'])[0]
 
+    def save_models(self):
+        for i in self.units:
+            if 'model' in self.describe[i]:
+                self.describe[i]['model'].save(f'{self.model_path}/model_{i}.pkl')
+
 
 class GetLSTM(Model):
     def __init__(self, data, kind):
