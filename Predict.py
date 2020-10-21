@@ -165,7 +165,7 @@ class GetLSTM(Model):
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         self.kind = kind
         self.kind_dict = {'hum': 'humidity', 'temp': 'temperature', 'heat': 'heat_index'}
-        self.describe = {'rmse': 1.11, 'date': '24-09-2020 19:09:36', 'model': None, 'arrow': 'down'}
+        self.describe = {'rmse': 1.11, 'date': "21-10-2020 16:58:53", 'model': None, 'arrow': 'down'}
         self.step = 60
         self.lstm = None
         self.last_trained = None
@@ -186,9 +186,9 @@ class GetLSTM(Model):
         return lstm
 
     def load_model(self):
-        rmse = {'hum': {'rmse': 1.34, 'accuracy': 59.82, 'loss': 40.18},
-                'temp': {'rmse': 0.01, 'accuracy': 99.1, 'loss': 0.9},
-                'heat': {'rmse': 0.03, 'accuracy': 71.53, 'loss': 28.47}}
+        rmse = {'hum': {'rmse': 2.35, 'accuracy': 82.62, 'loss': 17.38},
+                'temp': {'rmse': 0.88, 'accuracy': 79.43, 'loss': 20.57},
+                'heat': {'rmse': 0.35, 'accuracy': 87.84, 'loss': 12.16}}
         self.describe['model'] = load_model(fr"{self.model_path}/{self.kind}.h5")
         self.describe.update(rmse[self.kind])
 
@@ -217,6 +217,7 @@ class GetLSTM(Model):
         # Create the x_test and y_test data sets
         lstm['x_test'] = []
         lstm['y_test'] = lstm['values'][lstm['training_data_len']:,:]
+        lstm['y_test'] = lstm['y_test'].astype(np.float)
         for k in range(self.step, len(lstm['test_data'])):
             lstm['x_test'].append(lstm['test_data'][k - self.step:k, 0])
         # Convert x_test to a numpy array
@@ -266,6 +267,7 @@ class GetLSTM(Model):
         pred = self.scaler.inverse_transform(pred)
 
         lstm['y_test'] = lstm['values'][lstm['training_data_len']:, :]
+        lstm['y_test'] = lstm['y_test'].astype(np.float)
 
         rmse = round(np.sqrt(np.mean(((pred - lstm['y_test']) ** 2))), 2)
         self.describe['rmse'] = rmse
@@ -346,7 +348,7 @@ class GroupLSTM:
 
     def save_models(self):
         for i in self.models:
-            self.models[i].save_model(f'{i}.h5')
+            self.models[i].save_model(f'models/lstm/{i}.h5')
 
 
 # pt = 'data/new_data.csv'
