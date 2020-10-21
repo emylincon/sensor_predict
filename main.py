@@ -150,7 +150,7 @@ def save_data():
                    l_data[i].temperature, l_data[i].humidity, l_data[i].heat_index,
                    a_data[i].temperature, a_data[i].humidity, a_data[i].heat_index]
             out.writerow(row)
-        out.writerow(['id', 'datetime', 'temperature', 'humidity'])
+        # out.writerow(['id', 'datetime', 'temperature', 'humidity'])
 
         # for item in db.session.query(Sensors).all():
         #     row = [item.id, item.datetime, item.temperature, item.humidity]
