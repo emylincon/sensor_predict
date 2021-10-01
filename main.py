@@ -21,7 +21,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.db')
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-
+server_endpoint = 'https://lsbu-sensors.herokuapp.com/send'
 
 # database models
 class Sensors(db.Model):
@@ -215,9 +215,7 @@ def add_data(temperature, humidity):
 
 def send_data_to_server():
     data = get_data()
-    # print('data to server->', data)
-    endpoint = 'https://lsbu-sensors.herokuapp.com/send'
-    requests.post(endpoint, json=data, )
+    requests.post(server_endpoint, json=data, )
 
 
 @app.route('/send')
